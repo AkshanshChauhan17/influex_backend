@@ -20,7 +20,7 @@ const Profile = {
     create: async(obj) => {
         const login_token = `login_${uuid.v4()}`;
         const id = `id_${uuid.v4()}`;
-        const result = await db.query('INSERT INTO influex.profiles (name, email, sm_links, profile_image_url, description, followers, login_token, platforms, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [obj.name, obj.email, obj.sm_links, "", obj.description, obj.followers, login_token, obj.platform, id]);
+        const result = await db.query('INSERT INTO profiles (name, email, sm_links, profile_image_url, description, followers, login_token, platforms, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [obj.name, obj.email, obj.sm_links, "", obj.description, obj.followers, login_token, obj.platform, id]);
         if (result[0].affectedRows > 0) {
             return {
                 id: id,
