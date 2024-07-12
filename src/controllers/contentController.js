@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const getAllContent = async(req, res) => {
     try {
-        const content = await Content.getAll();
+        const content = await Content.getAll(req.query.type);
         res.json(content);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -51,8 +51,8 @@ const updateContent = async(req, res) => {
 
 const deleteContent = async(req, res) => {
     try {
-        await Content.delete(req.params.id);
-        res.status(204).end();
+        const response = await Content.delete(req.params.id);
+        res.status(200).json({ response });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -72,7 +72,7 @@ const deleteVideo = async(req, res) => {
     try {
         const content = await Content.getById(req.params.id);
         if (content && content.video_url) {
-            const filePath = path.join(__dirname, '../../', content.video_url);
+            const filePath = path.join(__dirname, '../..', content.video_url);
             fs.unlinkSync(filePath);
             const response = await Content.deleteVideo(req.params.id);
             return res.status(200).json({ response });

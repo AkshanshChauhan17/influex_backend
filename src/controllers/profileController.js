@@ -1,8 +1,9 @@
+const { default: axios } = require('axios');
 const Profile = require('../models/profileModel');
 
 const getAllProfile = async(req, res) => {
     try {
-        const profile = await Profile.getAll();
+        const profile = await Profile.getAll(req.query.type);
         res.json(profile);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -25,6 +26,30 @@ const verifyByLoginToken = async(req, res) => {
             res.json({ status: true, profile });
         } else {
             res.json({ status: false, profile });
+        };
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const getLoginToken = async(req, res) => {
+    const { email } = req.params;
+    console.log(email)
+    try {
+        const token = await Profile.getLoginToken(email);
+        if (token) {
+            console.log("dd", token)
+            try {
+                const response = await axios.post('http://localhost:3000/api/send-mail/token', {
+                    log_token: token.login_token
+                });
+                res.json(response.data);
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Error calling another endpoint' });
+            }
+        } else {
+            res.json({ status: false, token });
         };
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -77,5 +102,6 @@ module.exports = {
     updateProfile,
     deleteProfile,
     updateProfilePhoto,
-    verifyByLoginToken
+    verifyByLoginToken,
+    getLoginToken
 };

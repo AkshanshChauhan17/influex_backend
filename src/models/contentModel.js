@@ -2,8 +2,8 @@ const db = require('../config/database');
 const uuid = require('uuid');
 
 const Content = {
-    getAll: async() => {
-        const [rows] = await db.query('SELECT * FROM content');
+    getAll: async(type) => {
+        const [rows] = await db.query('SELECT * FROM content WHERE type=? ORDER BY created_on DESC', type);
         return rows;
     },
 
@@ -27,12 +27,13 @@ const Content = {
     },
 
     delete: async(id) => {
-        await db.query('DELETE FROM content WHERE id = ?', [id]);
+        const isDeleted = await db.query('DELETE FROM content WHERE id = ?', [id]);
+        return isDeleted[0];
     },
 
     uploadVideo: async(obj, videoUrl) => {
         const id = `vid_${uuid.v4()}`;
-        const isUploaded = await db.query('INSERT INTO content (title, subtitle, hashtags, uploaded_by, video_url, id) VALUES (?, ?, ?, ?, ?, ?)', [obj.title, obj.subtitle, obj.hashtags, obj.uploaded_by, videoUrl, id]);
+        const isUploaded = await db.query('INSERT INTO content (title, subtitle, hashtags, uploaded_by, video_url, id, type) VALUES (?, ?, ?, ?, ?, ?, ?)', [obj.title, obj.subtitle, obj.hashtags, obj.uploaded_by, videoUrl, id, obj.type]);
         return isUploaded[0];
     },
 

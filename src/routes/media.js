@@ -4,25 +4,28 @@ const path = require("path");
 const sharp = require("sharp");
 const fs = require("fs");
 const ffmpegPath = require("ffmpeg-static");
-const { execFile, spawn } = require("child_process");
+const { spawn } = require("child_process");
 
 router.get('/get-image', async(req, res) => {
-    const { url } = req.query;
+    const { url, r } = req.query;
     const imagePath = path.join(__dirname, "../../", url);
 
     if (!fs.existsSync(imagePath)) {
         return res.status(404).json({ message: 'Image not found' });
     }
 
-    try {
-        const lowResBuffer = await sharp(imagePath).resize(200).toBuffer();
-        const highResBuffer = await sharp(imagePath).resize(1000).toBuffer();
+    const resizeWidth = parseInt(r, 10);
 
-        res.status(200).json({
-            message: 'Images generated successfully',
-            lowResImage: lowResBuffer.toString('base64'),
-            highResImage: highResBuffer.toString('base64'),
-        });
+    try {
+        if (r > 1000) {
+            const image = await sharp(imagePath).resize({ width: parseInt(1000, 10) }).toBuffer();
+            res.set('Content-Type', 'image/jpeg');
+            return res.status(200).send(image);
+        } else {
+            const image = await sharp(imagePath).resize({ width: resizeWidth }).toBuffer();
+            res.set('Content-Type', 'image/jpeg');
+            return res.status(200).send(image);
+        }
     } catch (error) {
         res.status(500).json({ message: 'Error processing the image', error });
     }
